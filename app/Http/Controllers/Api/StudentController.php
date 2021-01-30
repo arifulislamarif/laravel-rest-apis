@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Student;
 use Illuminate\Http\Request;
 
 class StudentController extends Controller
@@ -14,7 +15,8 @@ class StudentController extends Controller
      */
     public function index()
     {
-        return 1;
+        $students = Student::all();
+        return response()->json(['students' => $students], 200);
     }
 
     /**
@@ -35,7 +37,19 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validate($request, [
+            'name' => "required|unique:students,name",
+            'roll' => "required|numeric",
+            'address' => "required",
+        ]);
+
+        $student = new Student();
+        $student->name = $request->name;
+        $student->roll = $request->roll;
+        $student->address = $request->address;
+        $student->save();
+
+        return response()->json(['message' => 'Student Created Successfully'], 200);
     }
 
     /**
@@ -44,9 +58,13 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Student $student)
     {
-        //
+        if ($student) {
+            return response()->json(['student' => $student], 200);
+        }else{
+            return response()->json(['message' => 'Something Went Wrong'], 500);
+        }
     }
 
     /**
@@ -55,9 +73,13 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Student $student)
     {
-        //
+        if ($student) {
+            return response()->json(['student' => $student], 200);
+        }else{
+            return response()->json(['message' => 'Something Went Wrong'], 500);
+        }
     }
 
     /**
@@ -67,9 +89,20 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Student $student)
     {
-        //
+        $this->validate($request, [
+            'name' => "required|unique:students,name,$student->id",
+            'roll' => "required|numeric",
+            'address' => "required",
+        ]);
+
+        $student->name = $request->name;
+        $student->roll = $request->roll;
+        $student->address = $request->address;
+        $student->save();
+
+        return response()->json(['message' => 'Student Updated Successfully'], 200);
     }
 
     /**
@@ -78,8 +111,12 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Student $student)
     {
-        //
+        if($student){
+            $student->delete();
+        }
+
+        return response()->json(['message' => 'Student Deleted Successfully'], 200);
     }
 }
